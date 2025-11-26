@@ -1,2 +1,6 @@
 cryptography>=41.0.0
 pyperclip>=1.8.0
+
+flask
+flask-cors
+pyjwt

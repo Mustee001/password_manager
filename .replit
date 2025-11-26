@@ -1,4 +1,4 @@
-modules = ["python-3.11"]
+modules = ["python-3.11", "nodejs-20"]
 [agent]
 expertMode = true
 
@@ -16,15 +16,24 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Password Manager GUI"
+args = "AegisVault"
 
 [[workflows.workflow]]
-name = "Password Manager GUI"
+name = "AegisVault"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python core/mAA.py"
+args = "bash run.sh"
+waitForPort = 5000
 
 [workflows.workflow.metadata]
-outputType = "vnc"
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 45283
+externalPort = 3000
