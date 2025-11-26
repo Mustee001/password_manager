@@ -4,3 +4,7 @@ pyperclip>=1.8.0
 flask
 flask-cors
 pyjwt
+cryptography
+flask
+flask-cors
+pyperclip
