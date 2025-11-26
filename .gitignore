@@ -61,3 +61,4 @@ Thumbs.db
 
 # Old core module (legacy)
 core/__pycache__/
+.env
