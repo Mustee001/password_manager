@@ -37,3 +37,8 @@ externalPort = 80
 [[ports]]
 localPort = 45283
 externalPort = 3000
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["python", "server/app.py"]
+build = ["bash", "-c", "cd client && npm run build"]
