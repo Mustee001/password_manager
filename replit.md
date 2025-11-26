@@ -158,7 +158,7 @@ Render offers a generous free tier perfect for hosting this application.
      ```
    - **Start Command**: 
      ```
-     gunicorn --bind 0.0.0.0:$PORT server.app:app
+     gunicorn --bind 0.0.0.0:$PORT wsgi:app
      ```
 
 5. **Add Environment Variables**
