@@ -16,9 +16,9 @@ from cryptography.hazmat.primitives import hashes
 import jwt
 
 app = Flask(__name__, static_folder='../client/dist', static_url_path='')
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-DATA_DIR = "data"
+DATA_DIR = os.environ.get('DATA_DIR', 'data')
 KEY_FILE = os.path.join(DATA_DIR, "master.key.encrypted")
 SALT_FILE = os.path.join(DATA_DIR, "salt.salt")
 PASSWORDS_FILE = os.path.join(DATA_DIR, "vault.dat")
@@ -32,6 +32,30 @@ PBKDF2_ITERATIONS = 200000
 os.makedirs(DATA_DIR, exist_ok=True)
 
 sessions = {}
+
+try:
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://"
+    )
+    RATE_LIMITING_ENABLED = True
+except ImportError:
+    RATE_LIMITING_ENABLED = False
+    limiter = None
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    return response
 
 def get_or_create_salt():
     if not os.path.exists(SALT_FILE):
@@ -596,6 +620,10 @@ def import_passwords():
         'skipped': skipped
     })
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy', 'version': '2.0.0'})
+
 @app.route('/<path:path>')
 def serve_static(path):
     if os.path.exists(os.path.join(app.static_folder, path)):
@@ -603,4 +631,6 @@ def serve_static(path):
     return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=5001, debug=False)
+    port = int(os.environ.get('PORT', 5001))
+    debug = os.environ.get('FLASK_ENV') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug)

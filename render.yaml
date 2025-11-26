@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: aegisvault
+    runtime: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      cd client && npm install && npm run build
+    startCommand: gunicorn --chdir server --bind 0.0.0.0:$PORT app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: NODE_VERSION
+        value: "20"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATA_DIR
+        value: "/data"
+    disk:
+      name: aegisvault-data
+      mountPath: /data
+      sizeGB: 1
